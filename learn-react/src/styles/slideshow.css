@@ -1,0 +1,39 @@
+
+.custom-slider {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+
+
+.square-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 200px;
+    border-radius: 8px; /* Tùy chỉnh góc bo tròn nếu cần */
+}
+.custom-container {
+    position: relative;
+    background-image: url('https://bachlongmobile.com/bnews/wp-content/uploads/2020/07/279626d7a06309ce3.jpg');
+    background-size: cover;
+    background-position: center;
+    padding: 20px;
+    margin: 0 auto;
+    min-height: 30vh;
+}
+
+.custom-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(128, 128, 128, 0.1); /* Màu mờ cho hình ảnh */
+    z-index: -1;
+}
+
+

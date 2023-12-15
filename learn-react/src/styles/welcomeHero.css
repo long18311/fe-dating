@@ -1,0 +1,93 @@
+.hero {
+    background: url('../assets/images/welcome/hero1.jpg') no-repeat center center/cover;
+    color: #fff;
+    height: 100vh;
+    width: 100%;
+    position: relative;
+}
+
+.hero:before {
+    content: '';
+
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.hero .contentHero {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    /*justify-content: center;*/
+    max-width: 1100px;
+    margin: auto;
+    padding: 1rem;
+}
+
+.hero .contentHero p:first-child {
+    color: #f1a402;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.hero .contentHero p:nth-child(2) {
+    font-size: 1.9rem;
+}
+
+.hero .contentHero p:nth-child(3) {
+
+    font-size: 5rem;
+    font-weight: 700;
+}
+
+
+.hero .contentHero p:nth-child(4) {
+    color: #f1a402;
+    font-size: 2.2rem;
+    font-style: italic;
+}
+
+.hero .button {
+    margin: 1rem 0;
+    width: 300px;
+    background-color: #fe6e7b;
+    border: 1px solid #333;
+    color: #ffffff;
+}
+
+.hero .button:hover {
+    background-color: var(--secondary-dark);
+    border: 1px solid var(--secondary-dark);
+    color: #ffffff;
+}
+
+@media screen and (max-width:940px) {
+    .hero .content p:nth-child(3) {
+        font-size: 2.6rem;
+    }
+
+    .hero .content p:nth-child(4) {
+        font-size: 1.6rem;
+    }
+}
+
+.container{
+    margin-top: 5px;
+}
+
+.animated-text{
+    font-size: 2.2rem;
+    font-weight: 600;
+    min-width: 280px;
+    color: #fff;
+    align-items: center;
+    justify-content: center;
+    font-family: "Montserrat", sans-serif;
+}
+
+.animated-text span{
+    position: relative;
+}
+

@@ -1,0 +1,40 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+*{
+    padding: 0;
+    margin: 0;
+    font-family: "Montserrat", sans-serif;
+}
+
+.class_page {
+    padding-left: 20px;
+}
+.pagination__link {
+    padding-left: 20px;
+}
+.pagination__link--active a {
+    color: #fff;
+    background: #6c7ac9;
+}
+
+.pagination__link--disabled a {
+    color: rgb(198, 197, 202);
+    border: 1px  rgb(198, 197, 202);
+}
+
+.pb-full {
+    padding-bottom: 100%;
+}
+
+/* hide search icon on search focus */
+.search-bar:focus + .fa-search{
+    display: none;
+}
+
+@media screen and (min-width: 768px) {
+    .post:hover .overlay {
+        display: block;
+    }
+}
