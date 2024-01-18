@@ -22,7 +22,7 @@ export const MessageItem = (props) => {
         setIsActive(!isActive);
     };
     const renderContent = () => {
-        const content = message.content;
+        const content = message.content||'';
         const baseURL = 'http://res.cloudinary.com/ducauhnpz/';
 
         if (content.startsWith(`${baseURL}image/`)) {

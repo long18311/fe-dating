@@ -15,7 +15,6 @@ function AgeSlider({ minAge, maxAge, onChange }) {
 
     return (
         <div className="w-64 mt-3">
-            <div>Sở thích về độ tuổi</div>
             <label htmlFor="age" className="block text-sm font-medium text-black">
                 Tuổi: {ageRange[0]} - {ageRange[1]}
             </label>

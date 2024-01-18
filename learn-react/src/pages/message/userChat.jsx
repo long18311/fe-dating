@@ -4,7 +4,7 @@ import React from "react";
 export const UserChat = (props) => {
     const { userChat,onClick } = props;
     const renderContent = () => {
-        const content = userChat.content;
+        const content = userChat.content || '';
         const baseURL = 'http://res.cloudinary.com/ducauhnpz/';
 
         if (content.startsWith(`${baseURL}image/`)) {

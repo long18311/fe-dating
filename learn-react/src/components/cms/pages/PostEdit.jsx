@@ -4,21 +4,33 @@ import {useParams} from "react-router-dom";
 import axiosClient from "../../../apis/AxiosClient.js";
 import Swal from "sweetalert2";
 import {avatar} from "@material-tailwind/react";
+import showErrorAlert from "../../../pages/SwalAlert/showErrorAlert.jsx";
+import {TYPE_POSTS} from "../../../constants/index.js";
 
 export default function PostEdit(){
     const {postId} = useParams();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
+    const [type, setType] = useState('');
     const [images, setImages] = useState([]);
 
     useEffect(() => {
-        axiosClient.get(`/post/get/${postId}`).then((res) => {
+        axiosClient.get(`/post/get/id/${postId}`).then((res) => {
             setContent(res.content)
             setTitle(res.title)
+            setType(res.type)
             setImages(res.images)
             console.log(res);
         })
     }, []);
+    const isImageValid = (file) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = URL.createObjectURL(file);
+        });
+    }
 
     // const handleImageChange = (e) => {
     //     setImage(e.target.files[0]);
@@ -35,9 +47,10 @@ export default function PostEdit(){
             // Thêm một biểu tượng spinner từ Font Awesome
             html: '<i class="fa fa-spinner fa-spin fa-2x"></i>',
         });
-        axiosClient.put(`/post/${postId}?title=${title}&content=${content}`).then((res) => {
+        axiosClient.put(`/post/${postId}?title=${title}&content=${content}&type=${type}`).then((res) => {
             setContent(res.content)
             setTitle(res.title)
+            setType(res.type)
             setImages(res.images)
             console.log(res);
         })
@@ -48,6 +61,24 @@ export default function PostEdit(){
         <HeaderDefaultLayout/>
         <div className=" container mx-auto px-4">
             <form onSubmit={handleSubmit} className="space-y-4 mt-5">
+                <div className="mb-4">
+                    <select
+                        id="type"
+                        value={type}
+                        onChange={(e) => {
+                            setType(e.target.value);
+
+                        }}
+                        className="w-full p-2 border rounded-md bg-white shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    >
+                        {
+                            TYPE_POSTS.map((type,index) =>(
+                                <option key={index} value={type}>{type}</option>
+                            ))
+                        }
+
+                    </select>
+                </div>
                 <div>
                     <label htmlFor="title" className="block text-sm font-medium text-gray-700">Tiêu đề</label>
                     <input
@@ -89,7 +120,7 @@ export default function PostEdit(){
                                     const input = document.createElement('input');
                                     input.type = 'file';
                                     input.accept = 'image/*'; // Chỉ chấp nhận file ảnh
-                                    input.onchange = (e) => {
+                                    input.onchange = async (e) => {
                                         const file = e.target.files[0];
                                         if (!file) {
                                             // console.log('Không có file nào được chọn.');
@@ -98,6 +129,11 @@ export default function PostEdit(){
 
                                         // Kiểm tra MIME type của file
                                         if (file.type.match('image.*')) {
+                                            const isValidImage = await isImageValid(e.target.files[0]);
+                                            if (!isValidImage) {
+                                                showErrorAlert("error", "Lỗi", "File không phải là ảnh hợp lệ.");
+                                                return;
+                                            }
                                             // Xử lý file ảnh ở đây
                                             // console.log(URL.createObjectURL(file));
                                             Swal.fire({
@@ -147,14 +183,13 @@ export default function PostEdit(){
                                                             text: 'sủa ảnh thành công'
                                                         });
 
-                                                    }).catch((err)=>{
+                                                    }).catch((err) => {
                                                         Swal.fire({
                                                             icon: "error",
                                                             title: "Lỗi",
                                                             text: err.message
-                                                        });});
-
-
+                                                        });
+                                                    });
 
 
                                                 }

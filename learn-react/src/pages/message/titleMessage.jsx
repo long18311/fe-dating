@@ -21,15 +21,19 @@ export const TitleMessage = (props) => {
                 <img className="conversation-user-image" src={avatar} alt="" />
                 <div>
                     <div className="conversation-user-name">{fullName}</div>
-                    <div className={`conversation-user-status ${isActive ? 'online' : 'offline'}`}>
-                        {isActive ? 'Hoạt động' : 'Không hoạt động'}
-                    </div>
+                    {/*<div className={`conversation-user-status ${isActive ? 'online' : 'offline'}`}>*/}
+                    {/*    {isActive ? 'Hoạt động' : 'Không hoạt động'}*/}
+                    {/*</div>*/}
                     {/* Additional information like city can be added here if needed */}
                 </div>
             </div>
             <div className="conversation-buttons">
                 <button type="button"><i className="ri-phone-fill"></i></button>
-                <button type="button"><i className="ri-vidicon-line"></i></button>
+                <button type="button"><i className="ri-vidicon-line" onClick={() =>{
+
+                    const windowFeatures = `menubar=no,toolbar=no,status=no,width=${1200},height=${1000},top=${window.top.outerHeight / 2 + window.top.screenY - 500},left=${window.top.outerWidth / 2 + window.top.screenX - 600}`;
+                    const newTab = window.open(`http://localhost:5173/meet?userID=${userChat.id}`, '_blank', windowFeatures);
+                }}></i></button>
                 <button type="button"><i className="ri-information-line"></i></button>
             </div>
         </div>

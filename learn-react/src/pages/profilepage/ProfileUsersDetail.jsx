@@ -1,6 +1,6 @@
 import {NavLink, useNavigate, useParams} from 'react-router-dom';
 import axiosClient from "../../apis/AxiosClient.js";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import HeaderDefaultLayout from "../../components/defaultlayout/HeaderDefaultLayout.jsx";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import { faCoffee, faMusic, faBriefcase, faUser } from '@fortawesome/free-solid-svg-icons';
@@ -11,6 +11,7 @@ import AxiosClient from "../../apis/AxiosClient.js";
 import showConfirmDelete from "../SwalAlert/showConfirmDelete.jsx";
 import showSuccessAlert from "../SwalAlert/showSuccessAlert.jsx";
 import {checkToken} from "../../utils/index.js";
+import LogoVerify from "../../assets/images/verify.png"
 
 const ProfileUsersDetail = () => {
     const {userId} = useParams();
@@ -28,7 +29,21 @@ const ProfileUsersDetail = () => {
     const [security, setSecurity] = useState(true);
     const [open, setOpen] = useState(false);
     const [subMenuOpen, setSubMenuOpen] = useState(false);
+    const [checkAuthorities, setCheckAuthorities] = useState(null);
+    const [zoomedImageIndex, setZoomedImageIndex] = useState(null);
+    const toggleImageZoom = (index) => {
+        if (zoomedImageIndex === index) {
+            // Nếu hình ảnh hiện tại đã được phóng to, thu nhỏ nó lại
+            setZoomedImageIndex(null);
+        } else {
+            // Nếu không, phóng to hình ảnh được chọn
+            setZoomedImageIndex(index);
+        }
+    };
 
+    function containsAdminRole(authorities) {
+        return authorities.some(auth => auth.name === "ROLE_ADMIN");
+    }
 
 
     useEffect(()=>{
@@ -47,8 +62,8 @@ const ProfileUsersDetail = () => {
                         receiverId: profileResponse.id,
                     }});
 
-                console.log(statusResponse)
-                console.log(profileResponse)
+                setCheckAuthorities(containsAdminRole(profileResponse.authorities))
+
                 // setSecurity(profileResponse.security)
                 if (statusResponse === "accepted") {
                     setStatus("accepted");
@@ -60,11 +75,19 @@ const ProfileUsersDetail = () => {
                     setStatus("rejected");
                 }
 
-                // Kiểm tra nếu cả hai kết quả giống nhau
-                if (JSON.stringify(userLoggedResponse) === JSON.stringify(profileResponse)) {
-                    navigate("/profilepage");
+                console.log(userLoggedResponse,profileResponse)
 
+                // Kiểm tra nếu cả hai kết quả giống nhau
+                if (userLoggedResponse.id === profileResponse.id) {
+                    navigate("/profilepage");
                 }
+
+              if (profileResponse.actived===0){
+                  navigate("/page-not-found")
+                  return;
+              }
+
+
                 setUserDetail(profileResponse);
                 setUserLogged(userLoggedResponse);
                 setInformationOptions(profileResponse.informationOptions);
@@ -81,7 +104,7 @@ const ProfileUsersDetail = () => {
                     setJoin("Tham gia LoveLink " + days + " ngày trước");
                 }
             } catch (error) {
-                console.error(error);
+               navigate("/page-not-found")
             }
         };
         fetchData();
@@ -154,6 +177,22 @@ const ProfileUsersDetail = () => {
         }
     }, [userDetail.birthday]);
 
+    function maskEmail(email) {
+        const [username, domain] = email.split('@');
+        const maskedUsername = username.substring(0, 3) + '*'.repeat(username.length - 3);
+        const domainParts = domain.split('.');
+        const maskedDomain = domainParts.map((part, index) => {
+            if (index === 0) {
+                return '*'.repeat(part.length);
+            } else if (index === domainParts.length - 1) {
+                return part[0] + '*'.repeat(part.length - 2) + part[part.length - 1];
+            }
+            return part;
+        }).join('.');
+
+        return maskedUsername + '@' + maskedDomain;
+    }
+
 
     return (
         <>
@@ -179,10 +218,11 @@ const ProfileUsersDetail = () => {
                         <div className="w-8/12 md:w-7/12 ml-4">
                             <div className="md:flex md:flex-wrap md:items-center mb-4">
                                 <h2 className="text-3xl inline-block font-light md:mr-2 mb-2 sm:mb-0">
-                                    {`${userDetail.lastname} ${userDetail.firstname} ${userDetail.lastname ? `(${userDetail.lastname})` : ''}`
+                                    {`${userDetail.lastname} ${userDetail.firstname} ${userDetail.lastname ? `(${userDetail.nickname})` : ''}`
                                     }
-                                </h2>
 
+                                </h2>
+                                {checkAuthorities && <img className={"w-5 h-5"} src={LogoVerify} alt="" />}
 
                                 <NavLink to=""
                                          className={`ml-3 px-4 py-2 text-white font-semibold text-sm rounded block text-center sm:inline-block block`}
@@ -346,10 +386,21 @@ const ProfileUsersDetail = () => {
                                     <span className="ml-2 text-blue-950">Quê quán :</span>
                                     <div className="">{userDetail.ward + ", " + userDetail.district + ", " + userDetail.city}</div>
                                 </div>
+                                <div className="mt-4 ml-10 ">
+                                    <i className="fas fa-book  "></i>
+                                    <span className="ml-2 text-blue-950">chiều cao :</span>
+                                    <div className="">{userDetail.height} cm</div>
+                                </div>
+                                <div className="mt-4 ml-10 ">
+                                    <i className="fas fa-book  "></i>
+                                    <span className="ml-2 text-blue-950">cân nặng :</span>
+                                    <div className="">{userDetail.weight} kg</div>
+                                </div>
                                 <div className="mt-4 ml-10">
                                     <i className="fas fa-envelope"></i>
                                     <span className="ml-2 text-blue-950">Email :</span>
-                                    <div className="">{userDetail.email}</div>
+                                    {userDetail.email && <div className="">{maskEmail(userDetail.email)}</div> }
+
                                 </div>
                                 <div className="mt-4 ml-10">
                                     <i className="fas fa-birthday-cake"></i>
@@ -379,20 +430,24 @@ const ProfileUsersDetail = () => {
                                             <span className="hidden md:inline">Ảnh nổi bật</span>
                                         </a>
                                     </li>
-
                                 </ul>
                                 <div className="flex flex-wrap -mx-px md:-mx-3 overflow-y-scroll h-[500px]">
                                     {images.map((o, i) => (
                                         <div className="w-1/2 p-px md:px-3" key={i}>
-                                            <a href="#">
+                                            <div>
                                                 <article className="ml-6 mt-2 post bg-gray-100 text-white relative pb-full md:mb-6">
-                                                    <img
-                                                        className="w-full h-full rounded-lg absolute left-0 top-0 object-cover"
-                                                        src={o.url}
-                                                        alt="image"
+                                                    <img onClick={() => toggleImageZoom(i)}
+                                                         className="w-full h-full rounded-lg absolute left-0 top-0 object-cover"
+                                                         src={o.url}
+                                                         alt="image"
                                                     />
                                                 </article>
-                                            </a>
+                                            </div>
+                                            {zoomedImageIndex === i && (
+                                                <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={() => toggleImageZoom(i)}>
+                                                    <img src={o.url}  className="w-96 h-96 p-4 object-contain" />
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

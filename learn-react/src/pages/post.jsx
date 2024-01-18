@@ -2,11 +2,16 @@ import Contentpost from "./Contentpost/index.jsx";
 import React, { useState, useEffect, useRef } from 'react';
 import profile1 from "../assets/profile-1.jpg";
 import "../styles/full.css"
-export default function Post() {
+import axiosClient from "../apis/AxiosClient.js";
+export default function Post(props) {
+    const { loading } = props;
     const [showContent, setShowContent] = useState(false);
     const formRef = useRef();
     const contentPostRef = useRef();
     const [inputValue, setInputValue] = useState('');
+    const [checkAuthorities, setCheckAuthorities] = useState(null);
+    const [userLogged,setUserloged] = useState(null)
+
 
     const toggleContent = () => setShowContent(!showContent);
 
@@ -24,8 +29,26 @@ export default function Post() {
             setInputValue(newValue);
         }
     };
+    // function check admin
+    function containsAdminRole(authorities) {
+        return authorities.some(auth => auth.name === "ROLE_ADMIN");
+    }
+
 
     useEffect(() => {
+
+        axiosClient.get("/userlogged").then(
+
+            (res)=>{
+                //res trả về
+                setCheckAuthorities(containsAdminRole(res.authorities))
+                setUserloged(res)
+            }
+        ).catch(
+            (err)=>{}
+        )
+
+
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
@@ -33,23 +56,26 @@ export default function Post() {
     }, []);
 
     return (
+
         <>
+            {checkAuthorities &&
             <form className="create-post mb-5" ref={formRef}>
                 <div className="profile-photo">
-                    <img src={profile1} alt="profile"/>
+                    <img src={userLogged.avatar} alt="profile"/>
                 </div>
                 <input
                     onClick={toggleContent}
                     type="text"
-                    placeholder="What's on your mind, Diana"
+                    placeholder={`Chào ${userLogged.lastname} , bạn đang suy nghĩ gì ?`}
                     id="create-post"
                     value={inputValue}
                     onChange={handleInputChange}
                 />
                 <input type="submit" value="Post" className="btn btn-primary"/>
             </form>
+}
             {showContent &&  <div className="absolute">
-                <Contentpost/>
+                <Contentpost loading = {() =>(loading())}/>
             </div>}
         </>
     );

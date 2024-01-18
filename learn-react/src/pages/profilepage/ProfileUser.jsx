@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoffee, faMusic, faBriefcase, faUser } from '@fortawesome/free-solid-svg-icons';
 import { NavLink } from 'react-router-dom';
 import ShowInfoAlert from "../SwalAlert/showInfoAlert.jsx";
+import LogoVerify from "../../assets/images/verify.png"
 
 
 export default function ProfileUserNew() {
@@ -22,6 +23,8 @@ export default function ProfileUserNew() {
     const [age, setAge] = useState();
     const [security, setSecurity] = useState(true);
     const [zoomedImageIndex, setZoomedImageIndex] = useState(null);
+    const [checkAuthorities, setCheckAuthorities] = useState(null);
+
 
     const toggleImageZoom = (index) => {
         if (zoomedImageIndex === index) {
@@ -35,7 +38,9 @@ export default function ProfileUserNew() {
 
     const navigate = useNavigate()
     // const tags = ["Phong cách sống", "Chiều cao", "Thông tin cơ bản"];
-
+    function containsAdminRole(authorities) {
+        return authorities.some(auth => auth.name === "ROLE_ADMIN");
+    }
 
     useEffect(() => {
         if (checkToken()) {
@@ -46,7 +51,7 @@ export default function ProfileUserNew() {
                 setUser(res)
                 setImages(res.images)
                 setAvt(`${res.avatar}`)
-                console.log(res.created_date)
+                setCheckAuthorities(containsAdminRole(res.authorities))
                 // Thời gian trước đó có định dạng '2023-10-02T12:02:11.000+00:00'
                 const previousTime = new Date(res.created_date);
                 const currentTime = new Date();
@@ -70,6 +75,8 @@ export default function ProfileUserNew() {
                     navigate("/createpage")
                 }
 
+
+
             })
         }
     }, []);
@@ -86,6 +93,10 @@ export default function ProfileUserNew() {
         setAge(calculatedAge);
     }, [user.birthday]);
 
+    function isAdmin(user) {
+        return user.authorities.includes('ROLE_ADMIN');
+    }
+
     return (
         <>
             <HeaderDefaultLayout />
@@ -96,9 +107,7 @@ export default function ProfileUserNew() {
                             className="w-full h-[250px]  bg-cover bg-center"
                             src={user.cover}
                         />
-
                     </div>
-
                     <header className="flex flex-wrap items-center p-4 md:py-8">
                         <div className="md:w-3/12 md:ml-16">
                             <img
@@ -114,14 +123,11 @@ export default function ProfileUserNew() {
                                     }
                                 </h2>
 
-
-                               
-                                <NavLink className=" bg-orange-500  ml-3 px-4 py-2 text-white font-semibold text-sm rounded block text-center sm:inline-block block" to="/createpage">
+                                {checkAuthorities && <img className={"w-5 h-5"} src={LogoVerify} alt="" />}
+                                <NavLink className=" bg-orange-500  ml-3 px-4 py-2 text-white font-semibold text-sm rounded block text-center sm:inline-block block" to="/updatepage">
                                     <button>Chỉnh sửa hồ sơ</button>
                                     <i className={"fas fa-edit ml-3"}></i>
                                 </NavLink>
-
-
                             </div>
                             <ul className="hidden md:flex space-x-8 mb-4">
                                 <li>
@@ -204,6 +210,16 @@ export default function ProfileUserNew() {
                                     <i className="fas fa-map-marker-alt"></i>
                                     <span className="ml-2 text-blue-950">Quê quán :</span>
                                     <div className="">{user.ward + ", " + user.district + ", " + user.city}</div>
+                                </div>
+                                <div className="mt-4 ml-10 ">
+                                    <i className="fas fa-book  "></i>
+                                    <span className="ml-2 text-blue-950">chiều cao :</span>
+                                    <div className="">{user.height} cm</div>
+                                </div>
+                                <div className="mt-4 ml-10 ">
+                                    <i className="fas fa-book  "></i>
+                                    <span className="ml-2 text-blue-950">cân nặng :</span>
+                                    <div className="">{user.weight} kg</div>
                                 </div>
                                 <div className="mt-4 ml-10">
                                     <i className="fas fa-envelope"></i>

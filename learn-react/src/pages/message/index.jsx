@@ -170,28 +170,53 @@ export default function Message() {
         getUserchats();
 
     }, [userId]);
-
+    function isFileValid(file) {
+        return new Promise((resolve, reject) => {
+            if (file.type.match('image.*')) {
+                // Xử lý file ảnh
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = URL.createObjectURL(file);
+            } else if (file.type.match('video.*')) {
+                // Xử lý file video
+                const video = document.createElement('video');
+                video.onloadeddata = () => resolve(true);
+                video.onerror = () => resolve(false);
+                video.src = URL.createObjectURL(file);
+            } else {
+                // Nếu không phải ảnh hoặc video
+                resolve(false);
+            }
+        });
+    }
     const handleImgChange = () => {
         // Tạo một input type='file' ẩn
         console.log('handle')
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*,video/*'; // Chỉ chấp nhận file ảnh
-        input.onchange = (e) => {
+        input.onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) {
                 console.log('Không có file nào được chọn.');
                 return;
             }
 
+
             // Kiểm tra MIME type của file
             if (file.type.match('image.*') || file.type.match('video.*')) {
-                if (file.size < 5242880){
-                // Xử lý file ảnh ở đây
-                console.log(URL.createObjectURL(file));
-                Swal.fire({
-                    title: "",
-                    html: `
+                const isValidImage = await isFileValid(file);
+                if (!isValidImage) {
+                    showErrorAlert("error", "Lỗi", "File không phải là ảnh hợp lệ.");
+                    return;
+                }
+                if (file.size < 5242880) {
+                    // Xử lý file ảnh ở đây
+                    console.log(URL.createObjectURL(file));
+                    Swal.fire({
+                        title: "",
+                        html: `
                     <div class="flex justify-center items-center h-full">
                     <img className="mx-auto my-auto rounded-full border-2 border-pink-600 p-1"
                     src = "${URL.createObjectURL(file)}"
@@ -199,56 +224,56 @@ export default function Message() {
                     />
                     <div/>
                     `,
-                    confirmButtonText: 'Gửi ảnh',
-                    focusConfirm: false,
-                    preConfirm: () => {
+                        confirmButtonText: 'Gửi ảnh',
+                        focusConfirm: false,
+                        preConfirm: () => {
 
-                        return file;
-                    },
-                }).then(async (result) => {
-                    console.log(result.isConfirmed)
-                    if (result.isConfirmed) {
-                        const formData = new FormData();
-                        formData.append('file', result.value);
-                        try {
-                            Swal.fire({
-                                title: 'Vui lòng chờ trong giây lát',
-                                allowOutsideClick: false,
-                                showConfirmButton: false,
-                                onBeforeOpen: () => {
-                                    Swal.showLoading(); // Hiển thị biểu tượng spinner từ Font Awesome
-                                },
-                                // Thêm một biểu tượng spinner từ Font Awesome
-                                html: '<i class="fa fa-spinner fa-spin fa-2x"></i>',
-                            });
+                            return file;
+                        },
+                    }).then(async (result) => {
+                        console.log(result.isConfirmed)
+                        if (result.isConfirmed) {
+                            const formData = new FormData();
+                            formData.append('file', result.value);
+                            try {
+                                Swal.fire({
+                                    title: 'Vui lòng chờ trong giây lát',
+                                    allowOutsideClick: false,
+                                    showConfirmButton: false,
+                                    onBeforeOpen: () => {
+                                        Swal.showLoading(); // Hiển thị biểu tượng spinner từ Font Awesome
+                                    },
+                                    // Thêm một biểu tượng spinner từ Font Awesome
+                                    html: '<i class="fa fa-spinner fa-spin fa-2x"></i>',
+                                });
 
-                            // Thay thế 'your-backend-endpoint' với endpoint thực tế của bạn
-                            const res = await axiosClient.post(`messages/upload-files/${userId}`, formData, {
-                                headers: {
-                                    'Content-Type': 'multipart/form-data'
-                                }
-                            });
-                            await getMeschat();
-                            getUserchats();
-                            console.log(res)
-                            Swal.close();
-                            Swal.fire("Đã gửi");
+                                // Thay thế 'your-backend-endpoint' với endpoint thực tế của bạn
+                                const res = await axiosClient.post(`messages/upload-files/${userId}`, formData, {
+                                    headers: {
+                                        'Content-Type': 'multipart/form-data'
+                                    }
+                                });
+                                await getMeschat();
+                                getUserchats();
+                                console.log(res)
+                                Swal.close();
+                                Swal.fire("Đã gửi");
 
-                            // Reset trạng thái nếu cần
-                            setSelectedFile(null);
-                            setFilePreview(null);
-                        } catch (error) {
-                            // Xử lý lỗi từ phản hồi hoặc lỗi mạng
-                            console.error('Lỗi khi tải lên:', error.response ? error.response.data : error.message);
+                                // Reset trạng thái nếu cần
+                                setSelectedFile(null);
+                                setFilePreview(null);
+                            } catch (error) {
+                                // Xử lý lỗi từ phản hồi hoặc lỗi mạng
+                                console.error('Lỗi khi tải lên:', error.response ? error.response.data : error.message);
+                            }
                         }
-                    }
-                });
-                } else{
-                    showErrorAlert("error","Lỗi","Đã vượt quá 5MB");
+                    });
+                } else {
+                    showErrorAlert("error", "Lỗi", "Đã vượt quá 5MB");
                 }
 
             } else {
-                showErrorAlert("error","Lỗi","File không phải là ảnh,video.");
+                showErrorAlert("error", "Lỗi", "File không phải là ảnh,video.");
             }
         };
 
@@ -256,64 +281,7 @@ export default function Message() {
         input.click();
     };
 
-    // const handleFileSelectSecond = (event) => {
-    //     const file = event.target.files[0];
-    //     const maxSize = 5 * 1024 * 1024; // 5MB 5242880
-    //
-    //     if (file.size < maxSize) {
-    //         const fileType = file.type.split('/')[0]; // 'image' hoặc 'video'
-    //         const previewUrl = URL.createObjectURL(file);
-    //         setFilePreview({ url: previewUrl, type: fileType });
-    //         setSelectedFile(file)
-    //     } else {
-    //         setFilePreview(null);
-    //         showErrorAlert("error","Lỗi","Đã vượt quá 5MB")
-    //     }
-    //
-    // };
-    // const handleSubmit = async () => {
-    //     if (!selectedFile) return; // Kiểm tra xem có file nào đã được chọn không
-    //
-    //     const formData = new FormData();
-    //     formData.append('file', selectedFile); // Sử dụng state selectedFile chứa file đã chọn
-    //
-    //     try {
-    //         Swal.fire({
-    //             title: 'Vui lòng chờ trong giây lát',
-    //             allowOutsideClick: false,
-    //             showConfirmButton: false,
-    //             onBeforeOpen: () => {
-    //                 Swal.showLoading(); // Hiển thị biểu tượng spinner từ Font Awesome
-    //             },
-    //             // Thêm một biểu tượng spinner từ Font Awesome
-    //             html: '<i class="fa fa-spinner fa-spin fa-2x"></i>',
-    //         });
-    //
-    //         // Thay thế 'your-backend-endpoint' với endpoint thực tế của bạn
-    //         const res = await axiosClient.post(`messages/upload-files/${userId}`, formData, {
-    //             headers: {
-    //                 'Content-Type': 'multipart/form-data'
-    //             }
-    //         });
-    //         await getMeschat();
-    //         getUserchats();
-    //         console.log(res)
-    //         Swal.close();
-    //         Swal.fire("Đã gửi");
-    //
-    //         // Reset trạng thái nếu cần
-    //         setSelectedFile(null);
-    //         setFilePreview(null);
-    //     } catch (error) {
-    //         // Xử lý lỗi từ phản hồi hoặc lỗi mạng
-    //         console.error('Lỗi khi tải lên:', error.response ? error.response.data : error.message);
-    //     }
-    // };
-    // const removeSelectedFile = () => {
-    //     setFilePreview(null);
-    //     setSelectedFile(null);
-    //     // Nếu bạn cũng lưu trữ file đã chọn trong state, hãy set nó về null
-    // };
+
     const startRecording = async () => {
         // Yêu cầu quyền truy cập microphone
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -376,11 +344,23 @@ export default function Message() {
         formData.append('audioFile', audioBlob, 'user-audio.wav'); // 'user-audio.wav' là tên file mà bạn muốn đặt, hoặc có thể để trống
 
         try {
+            Swal.fire({
+                title: 'Vui lòng chờ trong giây lát',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                onBeforeOpen: () => {
+                    Swal.showLoading(); // Hiển thị biểu tượng spinner từ Font Awesome
+                },
+                // Thêm một biểu tượng spinner từ Font Awesome
+                html: '<i class="fa fa-spinner fa-spin fa-2x"></i>',
+            });
             const response = await axiosClient.post(`/messages/upload/${userId}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+            Swal.close();
+            Swal.fire("Đã gửi");
             getMeschat();
             getUserchats();
             console.log(response); // Response từ server
@@ -508,12 +488,11 @@ export default function Message() {
                                     {userchats.sort((a, b) =>  new Date(b.time) - new Date(a.time)).map((u) => (
                                         <UserChat
                                             key={u.id} // Sử dụng u.id làm key để đảm bảo mỗi UserChat có một key duy nhất
-                                            onClick={() => { navigate(`/message/${u.id}`); console.log(userchats); }}
+                                            onClick={() => { navigate(`/message/${u.id}`); }}
                                             userChat={u}
                                         />
                                     ))}
                                 </ul>
-
                             </div>
                         </div>
 

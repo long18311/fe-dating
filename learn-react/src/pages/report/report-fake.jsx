@@ -3,6 +3,7 @@ import {useState} from "react";
 import axiosClient from "../../apis/AxiosClient.js";
 import Swal from "sweetalert2";
 import {useParams} from "react-router-dom";
+import showSuccessAlert from "../SwalAlert/showSuccessAlert.jsx";
 
 export default function ReportFake(){
     // const MAX_FILES = 3;
@@ -89,6 +90,17 @@ export default function ReportFake(){
 
                         <button type="button"
                                 onClick={() => {
+
+                                    Swal.fire({
+                                        title: 'Vui lòng chờ trong giây lát',
+                                        allowOutsideClick: false,
+                                        showConfirmButton: false,
+                                        onBeforeOpen: () => {
+                                            Swal.showLoading(); // Hiển thị biểu tượng spinner từ Font Awesome
+                                        },
+                                        // Thêm một biểu tượng spinner từ Font Awesome
+                                        html: '<i class="fa fa-spinner fa-spin fa-2x"></i>',
+                                    });
                                     const formData = new FormData();
                                     formData.append("reportType",reportType)
                                     formData.append("idReport", Number(userId));
@@ -100,14 +112,14 @@ export default function ReportFake(){
                                         },
                                     }).then(
                                         (res)=>{
-                                            Swal.close();
-                                            Swal.fire('Thành công!', res, 'success');
+                                            Swal.close()
+                                            showSuccessAlert("Báo cáo thành công")
                                         }
                                     ).catch((error) => {
-                                        Swal.close();
+                                        Swal.close()
                                         Swal.fire('Lỗi!', error, 'error');
                                     });
-                                }} className="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-blue-600 sm:w-fit hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Send message</button>
+                                }} className="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-blue-600 sm:w-fit hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Gửi báo cáo</button>
                     </form>
 
                 </div>

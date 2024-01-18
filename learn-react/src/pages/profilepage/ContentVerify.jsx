@@ -1,27 +1,20 @@
 import "../Contentpost/style.css"
-// import logo from "../fb-icons/logo.png"
-// import emoji from "../fb-icons/emoji.svg"
-// import tag from "../fb-icons/tag.svg"
 import theme from "../fb-icons/theme.svg"
-import React, {useEffect, useState} from "react";
-import axiosClient from "../../apis/AxiosClient.js";
+import {useEffect, useState} from "react";
 import Swal from "sweetalert2";
 import showErrorAlert from "../SwalAlert/showErrorAlert.jsx";
-import {TYPE_POSTS} from "../../constants/index.js";
+import axios from "axios";
 
-export default function  Contentpost(props){
-    const { loading } = props;
+export default function  ContentVerify(props){
+    // eslint-disable-next-line react/prop-types
+    const { userProfile,setProfile } = props;
     const [userLogged, setUserLogged] = useState({});
+    const [cccd, setCccd] = useState({});
     const [file, setFile] = useState(null);
-    const [title, setTitle] = useState("");
-    const [type, setType] = useState("Ăn uống");
-    const [textAreaContent, setTextAreaContent] = useState("");
-    const isPostButtonActive = file && file.type.match('image.*') && textAreaContent.length > 0;
+
+    const isPostButtonActive = file && file.type.match('image.*');
     useEffect(() => {
-         axiosClient.get("/userProfile").then((res) => {
-             setUserLogged(res);
-             console.log(res)
-         })
+        setUserLogged(userProfile);
     }, []);
     const isImageValid = (file) => {
         return new Promise((resolve, reject) => {
@@ -36,62 +29,12 @@ export default function  Contentpost(props){
             <div className="container-p shadow-lg ml-5">
                 <div className="wrapper-p">
                     <section className="post-p">
-                        <header>Create Post</header>
+                        <header>Xác minh</header>
                         <div className="formab">
-                            <div className="content">
-                                <img className="profile-photo" src={userLogged.avatar} alt=""/>
-                                    <div className="details">
-                                        <p>{`${userLogged.lastname} ${userLogged.firstname}`
-                                        }</p>
-                                        <div className="privacy">
-                                            <i className="fas fa-globe-asia"></i>
-                                            <span className={"ml-2"}>public</span>
-
-                                        </div>
-                                    </div>
-                            </div>
-                            <div className="mb-4">
-                                <select
-                                    id="type"
-                                    value={type}
-                                    onChange={(e) => {
-                                        setType(e.target.value);
-
-                                    }}
-                                    className="w-full p-2 border rounded-md bg-white shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                >
-                                    {
-                                        TYPE_POSTS.map((type,index) =>(
-                                            <option key={index} value={type}>{type}</option>
-                                        ))
-                                    }
-
-                                </select>
-                            </div>
-                            <input
-                                maxLength="300"
-                                placeholder="Title"
-                                required
-                                onChange={(e) => setTitle(e.target.value)}
-                            ></input>
-                            <textarea
-                                maxLength="4000"
-                                placeholder="What's on your mind"
-                                required
-                                onChange={(e) => setTextAreaContent(e.target.value)}
-                            ></textarea>
-                            <div className="theme-omoji">
 
 
-                            </div>
                             <div className="options">
-                                {file ? (
-                                    <div className="w-full p-2 border border-gray-200 rounded-md">
-                                        <p className="text-sm truncate">{file.name}</p>
-                                    </div>
-                                ) : (
-                                    <p>Add to your post</p>
-                                )}
+
                                 <ul className="list">
                                     <li><img onClick={() =>{
                                         // Tạo một input type='file' ẩn
@@ -124,8 +67,15 @@ export default function  Contentpost(props){
                                     }} src={theme} alt=""/></li>
 
                                 </ul>
+                                {file ? (
+                                    <div className="w-full p-2 border border-gray-200 rounded-md">
+                                        <p className="text-sm truncate">{file.name}</p>
+                                    </div>
+                                ) : (
+                                    <p>ảnh</p>
+                                )}
                             </div>
-                            <button disabled={!isPostButtonActive} onClick={()=>{
+                            <button type='button' disabled={!isPostButtonActive}  onClick={ async ()=>{
                                 if(!isPostButtonActive){return}
                                 Swal.fire({
                                     title: 'Vui lòng chờ trong giây lát',
@@ -138,25 +88,25 @@ export default function  Contentpost(props){
                                     html: '<i class="fa fa-spinner fa-spin fa-2x"></i>',
                                 });
                                 const formData = new FormData();
-                                formData.append("title",title)
-                                formData.append("type",type)
-                                formData.append("content", textAreaContent);
                                 formData.append("image", file);
-                                axiosClient.post('/post', formData, {
+                                await axios.post('https://api.fpt.ai/vision/idr/vnm', formData, {
                                     headers: {
                                         'Content-Type': 'multipart/form-data',
+                                        'api-key': 'U95uyYgr9Df6KCS1uLoH78v3C883mS3C',
                                     },
                                 }).then(
                                     (res)=>{
                                         Swal.close();
-                                        loading();
-                                        Swal.fire('Thành công!', res, 'success');
+                                        setCccd(res.data[0])
+                                        Swal.fire('thành công', "thành công", 'success');
                                     }
                                 ).catch((error) => {
                                     Swal.close();
                                     console.log(error)
                                     Swal.fire('Lỗi!', error, 'error');
                                 });
+
+
 
                             }}>Post</button>
                         </div>

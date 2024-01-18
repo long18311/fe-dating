@@ -15,9 +15,8 @@ function DistanceSlider({ minDistance, maxDistance, onChange }) {
 
     return (
         <div className="w-64 mt-5">
-            <div>Ưu tiên khoảng cách</div>
             <label htmlFor="Distance" className="block text-sm font-medium text-black">
-                Vị trí: {DistanceRange[0]} - {DistanceRange[1]} km
+                Vị trí cách bạn: {DistanceRange[0]} - {DistanceRange[1]} km
             </label>
             <Slider
                 range

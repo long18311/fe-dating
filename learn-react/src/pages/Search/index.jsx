@@ -77,7 +77,7 @@ function SearchBar() {
 
 
     const inputProps = {
-        placeholder: 'Nhập tên bạn muốn tìm kiếm',
+        placeholder: 'Bắt đầu bằng chữ cái hoặc tên...',
         value,
         onChange: onChange,
         className: 'p-2 border rounded-lg focus:outline-none w-80 mr-20',

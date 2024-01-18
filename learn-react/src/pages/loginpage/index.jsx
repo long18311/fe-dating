@@ -25,7 +25,7 @@ export  default function  LoginPage (){
         axiosClient.post("/authenticate",Auth).then((res)=>{
             showSuccessAlert("Đăng nhập thành công")
             localStorage.setItem(ACCESS_TOKEN,res)
-            navigate("/propose")
+            navigate("/home")
         }).catch((err)=>{
             showErrorAlert("error","Lỗi","Lỗi đăng nhập")
         })

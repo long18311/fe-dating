@@ -18,7 +18,6 @@ export default function Feeds (){
     useEffect(() => {
         axiosClient.get('/post/getAll').then((res) => {
             setPosts(res);
-            // console.log(res);
         })
     },[isLoad]);
 

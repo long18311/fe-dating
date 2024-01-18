@@ -9,19 +9,43 @@ import HeaderDefaultLayout from "@/components/defaultlayout/HeaderDefaultLayout.
 export default function Cms2(){
     const navigate = useNavigate();
     const [reportAccepteds,setReportAccepteds] = useState([]);
-    const [status, setStatus] = useState("pending");
+    const [status, setStatus] = useState("all");
     const [totalPages, setTotalPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(0);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+
+    function containsAdminRole(authorities) {
+        return authorities.some(auth => auth.name === "ROLE_ADMIN");
+    }
+
 
     useEffect(() => {
-        axiosClient.get(`/report/giả mạo/${status}?page=${currentPage}&size=10`).then((res) =>{
+        axiosClient.get("/userlogged").then(
+            (res) => {
+                if (!containsAdminRole(res.authorities)) {
+                    navigate("/404");
+                } else {
+                    setIsAdmin(true); // Xác nhận người dùng là admin
+
+                }
+            }
+        ).catch(
+            (err) => {
+                console.log(err)
+            }
+        )
+    },[]);
+
+    useEffect(() => {
+        axiosClient.get(`/report/lạm dụng/${status}?page=${currentPage}&size=10`).then((res) =>{
             setReportAccepteds(res.content);
             setTotalPages(res.totalPages)
         })
 
     },[]);
     useEffect(() => {
-        axiosClient.get(`/report/giả mạo/${status}?page=${currentPage}&size=10`).then((res) =>{
+        axiosClient.get(`/report/lạm dụng/${status}?page=${currentPage}&size=10`).then((res) =>{
             setReportAccepteds(res.content);
             setTotalPages(res.totalPages);
         })
@@ -31,6 +55,7 @@ export default function Cms2(){
     return(
         <div>
             <HeaderDefaultLayout/>
+            {isAdmin &&
             <section className="container mx-auto p-6 font-mono overflow-y-scroll  h-[700px]">
                 <div className="w-full mb-8 overflow-hidden rounded-lg shadow-lg">
                     <div className="w-full overflow-x-auto">
@@ -38,16 +63,17 @@ export default function Cms2(){
                             const { name, value } = e.target;
                             setStatus(value);
                         }}>
-                            <option value="pending">chưa xử lí</option>
-                            <option value="accepted">xử lí khóa</option>
-                            <option value="rejected">xử lí ko khóa</option>
+                            <option value="all">TẤT CẢ TRẠNG THÁI </option>
+                            <option value="pending">CHƯA XỬ LÝ</option>
+                            <option value="accepted">ĐÃ XỬ LÝ </option>
+                            <option value="rejected">ĐÃ TỪ CHỐI XỬ LÝ</option>
 
                         </select>
 
                         <table className="w-full ">
                             <thead>
                             <tr className="text-md font-semibold tracking-wide text-left text-gray-900 bg-gray-100 uppercase border-b border-gray-600">
-                                <th className="px-4 py-3">Tên</th>
+                                <th className="px-4 py-3">Tên người bị báo cáo</th>
                                 <th className="px-4 py-3">Loại</th>
                                 <th className="px-4 py-3">Trạng thái</th>
                                 <th className="px-4 py-3">Thời gian</th>
@@ -122,7 +148,7 @@ export default function Cms2(){
 
                     </div>
                 </div>
-            </section>
+            </section>}
         </div>
     )
 }

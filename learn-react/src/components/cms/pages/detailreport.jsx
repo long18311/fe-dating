@@ -44,8 +44,12 @@ const ReportDetail = () => {
             <div className="flex flex-col md:flex-row md:items-center">
                 <div className="flex-1">
                     <h2 className="text-xl font-semibold">Chi tiết Báo cáo</h2>
-                    <p><strong>Người báo cáo:</strong> {reportedBy.firstname} {reportedBy.lastname}</p>
-                    <p><strong>Người bị báo cáo:</strong> {reportedUser.firstname} {reportedUser.lastname}</p>
+                    <p><strong>Người báo cáo:</strong> <a onClick={()=>{
+                        window.open(`http://localhost:5173/profile/${reportedBy.id}`);
+                    }}>{reportedBy.firstname} {reportedBy.lastname}</a></p>
+                    <p><strong>Người bị báo cáo:</strong> <a onClick={()=>{
+                        window.open(`http://localhost:5173/profile/${reportedUser.id}`);
+                    }}>{reportedUser.firstname} {reportedUser.lastname}</a></p>
                     <p><strong>Thời gian báo cáo:</strong> {new Date(reportDate).toLocaleString()}</p>
                     <p><strong>Nội dung:</strong> {reportContent}</p>
                     {evidenceImage && (
@@ -71,7 +75,18 @@ const ReportDetail = () => {
                                     alert("vui lòng điền ghi chú");
                                     return;
                                 }
+                                Swal.fire({
+                                    title: 'Vui lòng chờ trong giây lát',
+                                    allowOutsideClick: false,
+                                    showConfirmButton: false,
+                                    onBeforeOpen: () => {
+                                        Swal.showLoading(); // Hiển thị biểu tượng spinner từ Font Awesome
+                                    },
+                                    // Thêm một biểu tượng spinner từ Font Awesome
+                                    html: '<i class="fa fa-spinner fa-spin fa-2x"></i>',
+                                });
                                 axiosClient.put(`/report/accepted/${reportId}?adminNotes=${adminNotes}`).then((res) => {
+                                    Swal.close();
                                     Swal.fire('Thành công!', res, 'success');
                                 }).catch((error) => {
                                     Swal.close();
@@ -86,6 +101,16 @@ const ReportDetail = () => {
                                     alert("vui lòng điền ghi chú");
                                     return;
                                 }
+                                Swal.fire({
+                                    title: 'Vui lòng chờ trong giây lát',
+                                    allowOutsideClick: false,
+                                    showConfirmButton: false,
+                                    onBeforeOpen: () => {
+                                        Swal.showLoading(); // Hiển thị biểu tượng spinner từ Font Awesome
+                                    },
+                                    // Thêm một biểu tượng spinner từ Font Awesome
+                                    html: '<i class="fa fa-spinner fa-spin fa-2x"></i>',
+                                });
                                 axiosClient.put(`/report/rejected/${reportId}?adminNotes=${adminNotes}`).then((res) => {
                                     Swal.fire('Thành công!', res, 'success');
                                 }).catch((error) => {

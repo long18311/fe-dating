@@ -1,3 +1,4 @@
+
 import {useEffect, useState} from "react";
 import {checkToken} from "../../utils/index.js";
 import axiosClient from "../../apis/AxiosClient.js";
@@ -9,6 +10,9 @@ import FooterDefaultLayout from "../../components/defaultlayout/FooterDefaultLay
 //axios này phục vụ cho callapi location
 import axios from "axios";
 import showInfoAlert from "../SwalAlert/showInfoAlert.jsx";
+import showErrorAlert from "../SwalAlert/showErrorAlert.jsx";
+import {removeLocationWords} from "../../constants/index.js";
+// import ContentVerify from "./ContentVerify.jsx";
 
 export const UpdateProfileUser = () => {
 
@@ -21,7 +25,7 @@ export const UpdateProfileUser = () => {
     const [selectedWard, setSelectedWard] = useState('');
     const [result, setResult] = useState('');
     const [userLoged,setUserLogged] = useState({ firstname: "" ,images : [] });
-
+    // const [showContent, setShowContent] = useState(false);
     const [latitude, setLatitude] = useState(null);
     const [longitude, setLongitude] = useState(null);
 
@@ -104,13 +108,22 @@ export const UpdateProfileUser = () => {
         setSelectedWard(selectedWardName);
         setResult('');
     };
+    const isImageValid = (file) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
     const handleAvatarChange = () => {
         // Tạo một input type='file' ẩn
         console.log('handle')
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*'; // Chỉ chấp nhận file ảnh
-        input.onchange = (e) => {
+        input.onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) {
                 // console.log('Không có file nào được chọn.');
@@ -119,6 +132,11 @@ export const UpdateProfileUser = () => {
 
             // Kiểm tra MIME type của file
             if (file.type.match('image.*')) {
+                const isValidImage = await isImageValid(file);
+                if (!isValidImage) {
+                    showErrorAlert("error", "Lỗi", "File không phải là ảnh hợp lệ.");
+                    return;
+                }
                 // Xử lý file ảnh ở đây
                 // console.log(URL.createObjectURL(file));
                 Swal.fire({
@@ -158,7 +176,7 @@ export const UpdateProfileUser = () => {
                             headers: {
                                 'Content-Type': 'multipart/form-data'
                             }
-                        }).then((res)=>{
+                        }).then((res) => {
                             setUserLogged((prevUserLoged) => ({
                                 ...prevUserLoged,
                                 avatar: res,
@@ -169,12 +187,13 @@ export const UpdateProfileUser = () => {
                                 title: "thành công",
                                 text: 'sủa ảnh thành công'
                             });
-                        }).catch((err)=>{
+                        }).catch((err) => {
                             Swal.fire({
                                 icon: "error",
                                 title: "Lỗi",
                                 text: err.message
-                            });});
+                            });
+                        });
                     }
 
                 });
@@ -193,7 +212,7 @@ export const UpdateProfileUser = () => {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*'; // Chỉ chấp nhận file ảnh
-        input.onchange = (e) => {
+        input.onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) {
                 // console.log('Không có file nào được chọn.');
@@ -202,8 +221,12 @@ export const UpdateProfileUser = () => {
 
             // Kiểm tra MIME type của file
             if (file.type.match('image.*')) {
-                // Xử lý file ảnh ở đây
-                // console.log(URL.createObjectURL(file));
+
+                const isValidImage = await isImageValid(file);
+                if (!isValidImage) {
+                    showErrorAlert("error", "Lỗi", "File không phải là ảnh hợp lệ.");
+                    return;
+                }
                 Swal.fire({
                     title: "",
                     html: `
@@ -240,7 +263,7 @@ export const UpdateProfileUser = () => {
                             headers: {
                                 'Content-Type': 'multipart/form-data'
                             }
-                        }).then((res)=>{
+                        }).then((res) => {
                             setUserLogged((prevUserLoged) => ({
                                 ...prevUserLoged,
                                 cover: res,
@@ -251,15 +274,13 @@ export const UpdateProfileUser = () => {
                                 title: "thành công",
                                 text: 'sủa ảnh thành công'
                             });
-                        }).catch((err)=>{
+                        }).catch((err) => {
                             Swal.fire({
                                 icon: "error",
                                 title: "Lỗi",
                                 text: err.message
-                            });})
-
-
-
+                            });
+                        })
 
 
                     }
@@ -279,7 +300,7 @@ export const UpdateProfileUser = () => {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*'; // Chỉ chấp nhận file ảnh
-        input.onchange = (e) => {
+        input.onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) {
                 // console.log('Không có file nào được chọn.');
@@ -288,6 +309,11 @@ export const UpdateProfileUser = () => {
 
             // Kiểm tra MIME type của file
             if (file.type.match('image.*')) {
+                const isValidImage = await isImageValid(file);
+                if (!isValidImage) {
+                    showErrorAlert("error", "Lỗi", "File không phải là ảnh hợp lệ.");
+                    return;
+                }
                 // Xử lý file ảnh ở đây
                 // console.log(URL.createObjectURL(file));
                 Swal.fire({
@@ -339,14 +365,13 @@ export const UpdateProfileUser = () => {
                                 text: 'sủa ảnh thành công'
                             });
 
-                        }).catch((err)=>{
+                        }).catch((err) => {
                             Swal.fire({
                                 icon: "error",
                                 title: "Lỗi",
                                 text: err.message
-                            });});
-
-
+                            });
+                        });
 
 
                     }
@@ -381,17 +406,77 @@ export const UpdateProfileUser = () => {
 
 
     // chọn informationOptions
-    const handleInformationOptionChange = (informationOptionId) => {
+    // const handleInformationOptionChange = (informationOptionId,infoField) => {
+    //     console.log("vào rồi nè")
+    //     var updatedSelectedInformationOptions;
+    //     if(infoField.multiSelect){
+    //         if (selectedInformationOptions.includes(informationOptionId)) {
+    //             console.log("vào rồi nè 1")
+    //             // Nếu sở thích đã được chọn, loại bỏ khỏi danh sách
+    //             setSelectedInformationOptions(selectedInformationOptions.filter((id) => id !== informationOptionId));
+    //         } else {
+    //             console.log("vào rồi nè 2")
+    //             // Nếu sở thích chưa được chọn, thêm vào danh sách
+    //             setSelectedInformationOptions([...selectedInformationOptions, informationOptionId]);
+    //         }
+    //     } else {
+    //         if (selectedInformationOptions.includes(informationOptionId)) {
+    //             // Nếu sở thích đã được chọn, loại bỏ khỏi danh sách
+    //             console.log("vào rồi nè 3")
+    //             updatedSelectedInformationOptions = infoField.informationOptions.map((informationOption) => {
+    //                 console.log(informationOption.id);
+    //                 return selectedInformationOptions.filter((id) => id !== informationOption.id|| id !== informationOptionId);
+    //             });
+    //
+    //             setSelectedInformationOptions(updatedSelectedInformationOptions);
+    //         } else {
+    //             // Nếu sở thích chưa được chọn, thêm vào danh sách
+    //             console.log("vào rồi nè 4")
+    //
+    //             updatedSelectedInformationOptions = infoField.informationOptions.map((informationOption) => {
+    //                 console.log(informationOption.id);
+    //                 return selectedInformationOptions.filter((id) => id !== informationOption.id|| id !== informationOptionId);
+    //             });
+    //             setSelectedInformationOptions([...updatedSelectedInformationOptions, informationOptionId]);
+    //
+    //         }
+    //     }
+    //
+    //
+    // };
+    const handleInformationOptionChange = (informationOptionId, infoField) => {
+        // console.log("vào rồi nè");
+        let updatedSelectedInformationOptions;
 
-        if (selectedInformationOptions.includes(informationOptionId)) {
-            // Nếu sở thích đã được chọn, loại bỏ khỏi danh sách
-            setSelectedInformationOptions(selectedInformationOptions.filter((id) => id !== informationOptionId));
+        if (infoField.multiSelect) {
+            // Xử lý khi multiSelect là true
+            setSelectedInformationOptions((prevSelected) => {
+                if (prevSelected.includes(informationOptionId)) {
+
+                    // Nếu đã được chọn, loại bỏ khỏi danh sách
+                    return prevSelected.filter((id) => id !== informationOptionId);
+                } else {
+                    // Nếu chưa được chọn, thêm vào danh sách
+                    return [...prevSelected, informationOptionId];
+                }
+            });
         } else {
-            // Nếu sở thích chưa được chọn, thêm vào danh sách
-            setSelectedInformationOptions([...selectedInformationOptions, informationOptionId]);
+            // Xử lý khi multiSelect là false
+            setSelectedInformationOptions((prevSelected) => {
+
+
+                // Lọc ra các ID của các options trong cùng infoField
+                const infoFieldOptionIds = infoField.informationOptions.map((option) => option.id);
+
+                // Nếu đã được chọn, loại bỏ tất cả các option của cùng infoField trước đó
+                updatedSelectedInformationOptions = prevSelected.filter((id) => !infoFieldOptionIds.includes(id));
+
+                // Thêm vào danh sách
+                updatedSelectedInformationOptions = [...updatedSelectedInformationOptions, informationOptionId];
+
+                return updatedSelectedInformationOptions;
+            });
         }
-
-
     };
     useEffect(() => {setUserLogged((prevUserLoged) => ({
         ...prevUserLoged,
@@ -427,51 +512,106 @@ export const UpdateProfileUser = () => {
 
                         <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6" >
                             {/* Trường nhập họ */}
-                            <div className="sm:col-span-3">
-                                <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
-                                    Họ
+                            {/*<div className="sm:col-span-3">*/}
+                            {/*    <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">*/}
+                            {/*        Họ*/}
+                            {/*    </label>*/}
+                            {/*    <div className="mt-2">*/}
+                            {/*        {userLoged && (*/}
+                            {/*            <input*/}
+                            {/*                className="p-3 block w-1/2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"*/}
+                            {/*                onChange={(e) => {*/}
+                            {/*                    const { name, value } = e.target;*/}
+                            {/*                    setUserLogged((prevUserLoged) => ({*/}
+                            {/*                        ...prevUserLoged,*/}
+                            {/*                        firstname: value,*/}
+                            {/*                    }));*/}
+                            {/*                }}*/}
+                            {/*                value={userLoged.firstname }*/}
+                            {/*            />*/}
+                            {/*        )}*/}
+                            {/*    </div>*/}
+                            {/*    {!userLoged.firstname && (*/}
+                            {/*        <p className={"text-red-500"}>Không đc để trống</p>*/}
+                            {/*    )}*/}
+                            {/*</div>*/}
+
+                            {/*Trường nhập tên*/}
+                            {/*<div className="sm:col-span-3"  >*/}
+                            {/*    <label htmlFor="last-name" className="block text-sm font-medium leading-6 text-gray-900">*/}
+                            {/*        Tên*/}
+                            {/*    </label>*/}
+                            {/*    <div className="mt-2">*/}
+                            {/*        {userLoged && (*/}
+                            {/*            <input*/}
+                            {/*                className="p-3 block w-1/2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"*/}
+                            {/*                onChange={(e) => {*/}
+                            {/*                    const { name, value } = e.target;*/}
+                            {/*                    setUserLogged((prevUserLoged) => ({*/}
+                            {/*                        ...prevUserLoged,*/}
+                            {/*                        lastname: value,*/}
+                            {/*                    }));*/}
+                            {/*                }}*/}
+                            {/*                value={userLoged.lastname }*/}
+                            {/*            />*/}
+                            {/*        )}*/}
+                            {/*    </div>*/}
+                            {/*    {!userLoged.lastname && (*/}
+                            {/*        <p className={"text-red-500"}>Không đc để trống</p>*/}
+                            {/*    )}*/}
+                            {/*</div>*/}
+                            {/*Trường nhập chiều cao*/}
+                            <div className="sm:col-span-3"  >
+                                <label htmlFor="last-name" className="block text-sm font-medium leading-6 text-gray-900">
+                                    chiều cao
                                 </label>
                                 <div className="mt-2">
                                     {userLoged && (
                                         <input
                                             className="p-3 block w-1/2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                            type="number"
+                                            min={140}
+                                            max={250}
                                             onChange={(e) => {
                                                 const { name, value } = e.target;
                                                 setUserLogged((prevUserLoged) => ({
                                                     ...prevUserLoged,
-                                                    firstname: value,
+                                                    height: value,
                                                 }));
                                             }}
-                                            value={userLoged.firstname }
+                                            value={userLoged.height }
                                         />
                                     )}
                                 </div>
-                                {!userLoged.firstname && (
+
+                                {(!userLoged.height || userLoged.height < 0) && (
                                     <p className={"text-red-500"}>Không đc để trống</p>
                                 )}
                             </div>
-
-                            {/*Trường nhập tên*/}
+                            {/*Trường nhập cân nặng*/}
                             <div className="sm:col-span-3"  >
                                 <label htmlFor="last-name" className="block text-sm font-medium leading-6 text-gray-900">
-                                    Tên
+                                    cân nặng
                                 </label>
                                 <div className="mt-2">
                                     {userLoged && (
                                         <input
                                             className="p-3 block w-1/2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                            type="number"
+                                            min={30}
+                                            max={120}
                                             onChange={(e) => {
                                                 const { name, value } = e.target;
                                                 setUserLogged((prevUserLoged) => ({
                                                     ...prevUserLoged,
-                                                    lastname: value,
+                                                    weight: value,
                                                 }));
                                             }}
-                                            value={userLoged.lastname }
+                                            value={userLoged.weight }
                                         />
                                     )}
                                 </div>
-                                {!userLoged.lastname && (
+                                {(!userLoged.weight || userLoged.weight < 0) && (
                                     <p className={"text-red-500"}>Không đc để trống</p>
                                 )}
                             </div>
@@ -503,27 +643,28 @@ export const UpdateProfileUser = () => {
                             </div>
 
                             {/*Trường nhập ngày tháng năm sinh*/}
-                            <div>
-                                <label>Ngày tháng năm sinh:</label>
-                                <div className="mt-2">
-                                    {userLoged && (
-                                        <input
-                                            type= "date"
-                                            onChange={(e) => {
-                                                const { name, value } = e.target;
-                                                setUserLogged((prevUserLoged) => ({
-                                                    ...prevUserLoged,
-                                                    birthday: value,
-                                                }));
-                                            }}
-                                            value={userLoged.birthday ? userLoged.birthday.split('T')[0] : '' }
-                                        />
-                                    )}
-                                </div>
-                                {!userLoged.birthday && (
-                                    <p className={"text-red-500"}>Không đc để trống</p>
-                                )}
-                            </div>
+                            {/*<div>*/}
+                            {/*    <label>Ngày tháng năm sinh:</label>*/}
+                            {/*    <div className="mt-2">*/}
+                            {/*        {userLoged && (*/}
+                            {/*            <input*/}
+                            {/*                type= "date"*/}
+                            {/*                onChange={(e) => {*/}
+                            {/*                    const { name, value } = e.target;*/}
+                            {/*                    setUserLogged((prevUserLoged) => ({*/}
+                            {/*                        ...prevUserLoged,*/}
+                            {/*                        birthday: value,*/}
+                            {/*                    }));*/}
+                            {/*                }}*/}
+                            {/*                value={userLoged.birthday ? userLoged.birthday.split('T')[0] : '' }*/}
+                            {/*            />*/}
+                            {/*        )}*/}
+                            {/*    </div>*/}
+                            {/*    {!userLoged.birthday && (*/}
+                            {/*        <p className={"text-red-500"}>Không đc để trống</p>*/}
+                            {/*    )}*/}
+                            {/*</div>*/}
+
 
                             {/* Trường nhập ảnh đại diện (Avatar) */}
                             <div className="col-span-full">
@@ -592,7 +733,8 @@ export const UpdateProfileUser = () => {
                                                 <div
                                                     className="cursor-pointer m-2 absolute top-0 right-0 h-8 w-8 bg-red-300 text-white justify-center items-center flex rounded-full"
                                                     onClick={
-                                                        ()=>{
+                                                        async () => {
+
                                                             Swal.fire({
                                                                 title: "Are you sure?",
                                                                 text: "You won't be able to revert this!",
@@ -603,7 +745,7 @@ export const UpdateProfileUser = () => {
                                                                 confirmButtonText: "Yes, delete it!"
                                                             }).then((result) => {
                                                                 if (result.isConfirmed) {
-                                                                    axiosClient.delete(`/userProfile/deleteUserImage/${o.id}`).then((res)=>{
+                                                                    axiosClient.delete(`/userProfile/deleteImageUser/${o.id}`).then((res) => {
                                                                         setUserLogged((prevUserLoged) => ({
                                                                             ...prevUserLoged,
                                                                             images: res,
@@ -613,7 +755,7 @@ export const UpdateProfileUser = () => {
                                                                             text: "Your file has been deleted.",
                                                                             icon: "success"
                                                                         });
-                                                                    }).catch((err)=>{
+                                                                    }).catch((err) => {
                                                                         Swal.fire({
                                                                             icon: "error",
                                                                             title: "Lỗi",
@@ -700,10 +842,10 @@ export const UpdateProfileUser = () => {
                                                                     <div key={infoOption.id} className="flex items-center mb-2">
                                                                         <input
                                                                             id={`option-${infoOption.id}`}
-                                                                            type={infoField.multiSelect ? "checkbox" : "radio"}
-                                                                            name={infoField.multiSelect ? `infoField-${infoField.id}` : `infoField-group-${infoField.id}`}
+                                                                            type= 'checkbox'
+                                                                            name={`infoField-${infoField.id}`}
                                                                             value={infoOption.id}
-                                                                            onChange={() => handleInformationOptionChange(infoOption.id)}
+                                                                            onChange={() => handleInformationOptionChange(infoOption.id,infoField)}
                                                                             checked={selectedInformationOptions.includes(infoOption.id)}
                                                                             className="mr-2"
                                                                         />
@@ -726,56 +868,56 @@ export const UpdateProfileUser = () => {
                         </div>
 
                         {/* Trường nhập giới tính */}
-                        <div>
-                            <label>Giới tính:</label>
-                            <div>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="gender" // Đặt cùng tên 'gender' cho các radio buttons cùng nhóm
-                                        value="Nam"
-                                        checked={userLoged.sex === "Nam"} // Sử dụng 'maritalstatus' thay vì 'sex'
-                                        onChange={() => {
-                                            setUserLogged((prevUserLoged) => ({
-                                                ...prevUserLoged,
-                                                sex: 'Nam',
-                                            }));
-                                        }}
-                                    />{" "}
-                                    Nam
-                                </label>
-                                <label className={"ml-3"}>
-                                    <input
-                                        type="radio"
-                                        name="gender" // Đặt cùng tên 'gender' cho các radio buttons cùng nhóm
-                                        value="Nữ"
-                                        checked={userLoged.sex === "Nữ"} // Sử dụng 'maritalstatus' thay vì 'sex'
-                                        onChange={() => {
-                                            setUserLogged((prevUserLoged) => ({
-                                                ...prevUserLoged,
-                                                sex: 'Nữ',
-                                            }));
-                                        }}
-                                    />{" "}
-                                    Nữ
-                                </label>
-                                <label className={"ml-3"}>
-                                    <input
-                                        type="radio"
-                                        name="gender" // Đặt cùng tên 'gender' cho các radio buttons cùng nhóm
-                                        value="Khác"
-                                        checked={userLoged.sex === "Khác"} // Sử dụng 'maritalstatus' thay vì 'sex'
-                                        onChange={() => {
-                                            setUserLogged((prevUserLoged) => ({
-                                                ...prevUserLoged,
-                                                sex: 'Khác',
-                                            }));
-                                        }}
-                                    />{" "}
-                                    Khác
-                                </label>
-                            </div>
-                        </div>
+                        {/*<div>*/}
+                        {/*    <label>Giới tính:</label>*/}
+                        {/*    <div>*/}
+                        {/*        <label>*/}
+                        {/*            <input*/}
+                        {/*                type="radio"*/}
+                        {/*                name="gender" // Đặt cùng tên 'gender' cho các radio buttons cùng nhóm*/}
+                        {/*                value="Nam"*/}
+                        {/*                checked={userLoged.sex === "Nam"} // Sử dụng 'maritalstatus' thay vì 'sex'*/}
+                        {/*                onChange={() => {*/}
+                        {/*                    setUserLogged((prevUserLoged) => ({*/}
+                        {/*                        ...prevUserLoged,*/}
+                        {/*                        sex: 'Nam',*/}
+                        {/*                    }));*/}
+                        {/*                }}*/}
+                        {/*            />{" "}*/}
+                        {/*            Nam*/}
+                        {/*        </label>*/}
+                        {/*        <label className={"ml-3"}>*/}
+                        {/*            <input*/}
+                        {/*                type="radio"*/}
+                        {/*                name="gender" // Đặt cùng tên 'gender' cho các radio buttons cùng nhóm*/}
+                        {/*                value="Nữ"*/}
+                        {/*                checked={userLoged.sex === "Nữ"} // Sử dụng 'maritalstatus' thay vì 'sex'*/}
+                        {/*                onChange={() => {*/}
+                        {/*                    setUserLogged((prevUserLoged) => ({*/}
+                        {/*                        ...prevUserLoged,*/}
+                        {/*                        sex: 'Nữ',*/}
+                        {/*                    }));*/}
+                        {/*                }}*/}
+                        {/*            />{" "}*/}
+                        {/*            Nữ*/}
+                        {/*        </label>*/}
+                        {/*        <label className={"ml-3"}>*/}
+                        {/*            <input*/}
+                        {/*                type="radio"*/}
+                        {/*                name="gender" // Đặt cùng tên 'gender' cho các radio buttons cùng nhóm*/}
+                        {/*                value="Khác"*/}
+                        {/*                checked={userLoged.sex === "Khác"} // Sử dụng 'maritalstatus' thay vì 'sex'*/}
+                        {/*                onChange={() => {*/}
+                        {/*                    setUserLogged((prevUserLoged) => ({*/}
+                        {/*                        ...prevUserLoged,*/}
+                        {/*                        sex: 'Khác',*/}
+                        {/*                    }));*/}
+                        {/*                }}*/}
+                        {/*            />{" "}*/}
+                        {/*            Khác*/}
+                        {/*        </label>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
 
 
                     </div>
@@ -815,52 +957,52 @@ export const UpdateProfileUser = () => {
 
                     </div>
 
-                    <div className="border-b border-gray-300 pb-12">
-                        <div className="text-lg font-semibold mb-4">Lựa chọn quê quán</div>
+                    {/*<div className="border-b border-gray-300 pb-12">*/}
+                    {/*    <div className="text-lg font-semibold mb-4">Lựa chọn quê quán</div>*/}
 
-                        <div className="mb-4">
-                            <select
-                                id="city"
-                                value={selectedCity}
-                                onChange={handleCityChange}
-                                className="w-full p-2 border rounded-md bg-white shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                            >
-                                <option value="" disabled>Chọn tỉnh thành</option>
-                                {cities.map((city) => (
-                                    <option key={city.code} value={city.code}>{city.name}</option>
-                                ))}
-                            </select>
-                        </div>
+                    {/*    <div className="mb-4">*/}
+                    {/*        <select*/}
+                    {/*            id="city"*/}
+                    {/*            value={selectedCity}*/}
+                    {/*            onChange={handleCityChange}*/}
+                    {/*            className="w-full p-2 border rounded-md bg-white shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"*/}
+                    {/*        >*/}
+                    {/*            <option value="" disabled>Chọn tỉnh thành</option>*/}
+                    {/*            {cities.map((city) => (*/}
+                    {/*                <option key={city.code} value={city.code}>{city.name}</option>*/}
+                    {/*            ))}*/}
+                    {/*        </select>*/}
+                    {/*    </div>*/}
 
-                        <div className="mb-4">
-                            <select
-                                id="district"
-                                value={selectedDistrict}
-                                onChange={handleDistrictChange}
-                                className="w-full p-2 border rounded-md bg-white shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                            >
-                                <option value="" disabled>Chọn quận huyện</option>
-                                {districts.map((district) => (
-                                    <option key={district.code} value={district.code}>{district.name}</option>
-                                ))}
-                            </select>
-                        </div>
+                    {/*    <div className="mb-4">*/}
+                    {/*        <select*/}
+                    {/*            id="district"*/}
+                    {/*            value={selectedDistrict}*/}
+                    {/*            onChange={handleDistrictChange}*/}
+                    {/*            className="w-full p-2 border rounded-md bg-white shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"*/}
+                    {/*        >*/}
+                    {/*            <option value="" disabled>Chọn quận huyện</option>*/}
+                    {/*            {districts.map((district) => (*/}
+                    {/*                <option key={district.code} value={district.code}>{district.name}</option>*/}
+                    {/*            ))}*/}
+                    {/*        </select>*/}
+                    {/*    </div>*/}
 
-                        <div className="mb-4">
-                            <select
-                                id="ward"
-                                value={selectedWard}
-                                onChange={handleWardChange}
-                                className="w-full p-2 border rounded-md bg-white shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                            >
-                                <option value="" disabled>Chọn phường xã</option>
-                                {wards.map((ward) => (
-                                    <option key={ward.code} value={ward.name}>{ward.name}</option>
-                                ))}
-                            </select>
-                        </div>
+                    {/*    <div className="mb-4">*/}
+                    {/*        <select*/}
+                    {/*            id="ward"*/}
+                    {/*            value={selectedWard}*/}
+                    {/*            onChange={handleWardChange}*/}
+                    {/*            className="w-full p-2 border rounded-md bg-white shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"*/}
+                    {/*        >*/}
+                    {/*            <option value="" disabled>Chọn phường xã</option>*/}
+                    {/*            {wards.map((ward) => (*/}
+                    {/*                <option key={ward.code} value={ward.name}>{ward.name}</option>*/}
+                    {/*            ))}*/}
+                    {/*        </select>*/}
+                    {/*    </div>*/}
 
-                    </div>
+                    {/*</div>*/}
 
                     <div className="mt-6 flex items-center justify-end gap-x-6">
                         <button type="button"  className="text-sm font-semibold leading-6 text-gray-900">
@@ -888,14 +1030,14 @@ export const UpdateProfileUser = () => {
                             const cityText = cities.find(city => city.code === parseInt(selectedCity, 10))?.name;
                             const districtText = districts.find(district => district.code === parseInt(selectedDistrict, 10))?.name;
                             const wardText = selectedWard;
-                            // Kiểm tra xem tất cả các trường đều đã được cập nhật
+                            //Kiểm tra xem tất cả các trường đều đã được cập nhật
                             if (cityText && districtText && wardText) {
                                 // setResult(`${cityText} | ${districtText} | ${wardText}`);
                                 setUserLogged(prevUserLoged => ({
                                     ...prevUserLoged,
-                                    city: cityText,
-                                    district: districtText,
-                                    ward: wardText
+                                    city: removeLocationWords(cityText),
+                                    district: removeLocationWords(districtText),
+                                    ward: removeLocationWords(wardText)
                                 }));
                             }
                             console.log(selectedInformationOptions)

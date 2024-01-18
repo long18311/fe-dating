@@ -9,10 +9,7 @@ export const ListRouters = [
         {name:"BẠN BÈ", path:"/friends",icon :"fas fa-user-friends text-primary text-2xl"
         },
 
-        {name:"HỒ SƠ", path:"/updatepage" , icon:"fas fa-newspaper text-2xl"
-        },
-
-        {name:"CÁ NHÂN", path:"/profilepage" , icon:"fas fa-user text-2xl"
+        {name:"CẬP NHẬT", path:"/updatepage" , icon:"fas fa-user text-2xl"
         },
 
         {name:"TÌM KIẾM", path:"/search" ,icon:"fas fa-map-marker text-2xl"

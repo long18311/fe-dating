@@ -10,14 +10,14 @@ import logo from '../../assets/images/welcome/logo.png';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import {jwtDecode} from "jwt-decode";
-
-
+import FileAudio from "../../assets/mp3/super-shy-iphone-nhacchuongviet.com.mp3"
+import Swal from 'sweetalert2';
 const navigation = [];
 
 ListRouters.map((item) => navigation.push({ name: item.name, href: item.path , icon: item.icon}));
 const handleLogout = () => {
     localStorage.removeItem(ACCESS_TOKEN);
-    window.location.href = 'http://localhost:5173/loginpage';
+    window.location.href = 'http://localhost:5173/welcome';
 
 };
 
@@ -38,6 +38,8 @@ export default function HeaderDefaultLayout() {
     const notificationContainerRef = useRef(null);
     const navigate = useNavigate();
     const stompClient = useRef(null);
+    const [checkAuthorities, setCheckAuthorities] = useState(null);
+
 
 
 
@@ -49,7 +51,7 @@ export default function HeaderDefaultLayout() {
             const token = localStorage.getItem(ACCESS_TOKEN);
             const decoded = jwtDecode(token);
             stompClient.current.subscribe(`/user/${Number(decoded.sub)}/queue/notifications`,  function (message) {
-                 axiosClient.get(`unread-count?recipientId=${userLogged.id}`).then((res) => {
+                 axiosClient.get(`unread-count?recipientId=${Number(decoded.sub)}`).then((res) => {
                      setUnreadCount(res);
                  })
                 console.log("thông báo");
@@ -59,6 +61,18 @@ export default function HeaderDefaultLayout() {
                     setUnreadMessage(res);
                 })
                 console.log("thông báo");
+            });
+            stompClient.current.subscribe(`/user/${Number(decoded.sub)}/queue/meet`,  function (incomingMessage) {
+                console.log("Notification received:", incomingMessage);
+
+                // Assuming the message body is a string "id:message"
+                const messageBody = incomingMessage.body;
+                const [id, message] = messageBody.split(':');
+
+                if (id){
+                    showAlert(Number(decoded.sub),id, message)
+                }
+
             });
         });
         return () => {
@@ -133,6 +147,11 @@ export default function HeaderDefaultLayout() {
             return () => notificationDiv.removeEventListener('scroll', handleScroll);
         }
     }, [notifications, page]);
+    // function check admin
+    function containsAdminRole(authorities) {
+        return authorities.some(auth => auth.name === "ROLE_ADMIN");
+    }
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -140,6 +159,8 @@ export default function HeaderDefaultLayout() {
                 // luồng 1
                 const userLoggedResponse = await axiosClient.get("/userlogged");
                 setUserLogged(userLoggedResponse);
+                setCheckAuthorities(containsAdminRole(userLoggedResponse.authorities))
+
                 //luồng 2
                 const unreadCountResponse = await axiosClient.get(`unread-count?recipientId=${userLoggedResponse.id}`);
                 setUnreadCount(unreadCountResponse);
@@ -147,8 +168,7 @@ export default function HeaderDefaultLayout() {
                     setUnreadMessage(res);
                 })
             } catch (error) {
-                console.error("Error fetching data:", error);
-                // Xử lý lỗi ở đây nếu cần
+                handleLogout()
             }
         };
 
@@ -156,6 +176,46 @@ export default function HeaderDefaultLayout() {
     }, []);
 
 
+    const showAlert = (iddangnhap,id,message) => {
+
+
+        const ringtone = new Audio(FileAudio);
+        ringtone.play();
+        const stopRingtone = () => {
+            ringtone.pause();
+            ringtone.currentTime = 0;
+        };
+        axiosClient.get(`/profile/${id}`).then((res) => {
+            Swal.fire({
+                title: 'Cuộc gọi đến',
+                text:  `Bạn có cuộc gọi từ ${res.lastname} ${res.firstname}, bạn có muốn trả lời không?`,
+                iconHtml: '<i class="fa fa-phone"></i>',
+                showCancelButton: true,
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Từ chối',
+                timer: 60000,
+                willClose: () => {
+                    console.log('Đã đóng');
+                    stopRingtone();
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log(true);
+                    const windowFeatures = `menubar=no,toolbar=no,status=no,width=${1200},height=${1000},top=${window.top.outerHeight / 2 + window.top.screenY - 500},left=${window.top.outerWidth / 2 + window.top.screenX - 600}`;
+                    const newTab = window.open(`http://localhost:5173/meet?roomID=${message}&userID=${iddangnhap}&userCallId=${id}`, '_blank', windowFeatures);
+
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    console.log(false);
+                } else if (result.dismiss === Swal.DismissReason.timer) {
+                    console.log('Đã đóng');
+                }
+                stopRingtone();
+            });
+            console.log(res);
+        })
+
+
+    }
 
     return (
         <Disclosure as="nav" className="bg-gray-800">
@@ -321,6 +381,8 @@ export default function HeaderDefaultLayout() {
                                                     </NavLink>
                                                 )}
                                             </Menu.Item>
+
+                                            { checkAuthorities &&
                                             <Menu.Item>
                                                 {({ active }) => (
                                                     <NavLink
@@ -332,6 +394,8 @@ export default function HeaderDefaultLayout() {
                                                     </NavLink>
                                                 )}
                                             </Menu.Item>
+                                            }
+                                            { checkAuthorities &&
                                             <Menu.Item>
                                                 {({ active }) => (
                                                     <NavLink
@@ -343,6 +407,7 @@ export default function HeaderDefaultLayout() {
                                                     </NavLink>
                                                 )}
                                             </Menu.Item>
+                                            }
                                             <Menu.Item>
                                                 {({ active }) => (
                                                     <a

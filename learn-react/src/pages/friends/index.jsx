@@ -27,7 +27,6 @@ export  default function Friends (){
         return;
         }
 
-
         const featch = async ()=>{
             const  useLogged = await axiosClient.get("/userlogged")
             const  getFriends = await  axiosClient.get(`friend/friends/${useLogged.id}`)

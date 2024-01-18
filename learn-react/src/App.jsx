@@ -31,6 +31,7 @@ import Cms2 from "./components/cms/pages/cms2.jsx";
 import PostEdit from "./components/cms/pages/PostEdit.jsx";
 import Post from "./pages/post.jsx";
 import PostDetail from "./components/cms/pages/PostDetail.jsx";
+import Check from "./pages/welcome/check.jsx";
 function App() {
 
     return (
@@ -38,6 +39,7 @@ function App() {
             <Routes>
                 <Route path={"/homepage"} element={<HomePage />} />
                 <Route path={"/test"} element={<PageProduct/>} />
+                <Route path={"/test2"} element={<Check/>} />
                 <Route path={"/report/:userId"} element={<Report/>} />
                 <Route path={"/report-fake/:userId"} element={<ReportFake/>} />
                 <Route path={"/"} element={<Propose />} />

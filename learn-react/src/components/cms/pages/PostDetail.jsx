@@ -27,7 +27,7 @@ export default function PostDetail(){
     const [liked, setLiked] = useState(false);
     const [disliked, setDisliked] = useState(false);
     useEffect(() => {
-        axiosClient.get(`/post/get/${postId}`).then((res) => {
+        axiosClient.get(`/post/get/id/${postId}`).then((res) => {
             setPost(res);
             setLiked(res.islike === 1);
             setDisliked(res.islike === 2);
